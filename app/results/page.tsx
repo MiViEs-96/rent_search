@@ -14,7 +14,12 @@ import {
   School,
   Hospital,
   ShoppingCart,
-  Bus
+  Bus,
+  ShieldCheck,
+  Calendar,
+  Trees,
+  Car,
+  Accessibility
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -129,6 +134,10 @@ function ResultsContent() {
                     <span>{p.address}</span>
                   </div>
 
+                  {p.description && (
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{p.description}</p>
+                  )}
+
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded-xl">
                       <Bed size={16} className="text-emerald-600" />
@@ -154,7 +163,25 @@ function ResultsContent() {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 pt-2">
+                  {p.ber && (
+                    <div className="flex items-center justify-between py-2 border-t border-gray-100">
+                      <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        <ShieldCheck size={14} className="text-emerald-500" /> BER Rating
+                      </div>
+                      <span className="text-xs font-black bg-emerald-100 text-emerald-800 px-2 py-1 rounded">{p.ber}</span>
+                    </div>
+                  )}
+
+                  {p.availableFrom && (
+                    <div className="flex items-center justify-between py-2 border-t border-gray-100">
+                      <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        <Calendar size={14} className="text-blue-500" /> Disponibile
+                      </div>
+                      <span className="text-xs font-medium text-gray-700">{p.availableFrom}</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
                       {p.amenitiesCount.schools > 0 && (
                         <span className="flex items-center gap-1 text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
                           <School size={10} /> SCUOLE ({p.amenitiesCount.schools})
@@ -167,20 +194,37 @@ function ResultsContent() {
                       )}
                       {p.amenitiesCount.transport > 0 && (
                         <span className="flex items-center gap-1 text-[10px] font-bold bg-purple-50 text-purple-700 px-2 py-1 rounded-md">
-                          <Bus size={10} /> TRASPORTI ({p.amenitiesCount.transport})
+                          <Bus size={10} /> TRASPORTI
+                        </span>
+                      )}
+                      {p.features?.garden && (
+                        <span className="flex items-center gap-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md">
+                          <Trees size={10} /> GIARDINO
+                        </span>
+                      )}
+                      {p.features?.parking && (
+                        <span className="flex items-center gap-1 text-[10px] font-bold bg-gray-50 text-gray-700 px-2 py-1 rounded-md">
+                          <Car size={10} /> PARCHEGGIO
+                        </span>
+                      )}
+                      {p.features?.accessible && (
+                        <span className="flex items-center gap-1 text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
+                          <Accessibility size={10} /> ACCESSIBILE
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <a
-                    href={p.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-6 w-full flex items-center justify-center gap-2 bg-gray-900 text-white p-3 rounded-xl font-bold hover:bg-black transition-colors"
-                  >
-                    Vedi su Daft.ie <ExternalLink size={16} />
-                  </a>
+                  {p.url && p.url !== '#' && (
+                    <a
+                      href={p.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-6 w-full flex items-center justify-center gap-2 bg-gray-900 text-white p-3 rounded-xl font-bold hover:bg-black transition-colors"
+                    >
+                      Vedi su Daft.ie <ExternalLink size={16} />
+                    </a>
+                  )}
                 </div>
               </div>
             ))

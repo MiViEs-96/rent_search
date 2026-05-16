@@ -10,3 +10,5 @@ dist
 .env.production.local
 .DS_Store
 *.log
+versatemple.db
+*.png

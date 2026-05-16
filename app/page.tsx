@@ -1,12 +1,39 @@
 'use client';
 
-import { ArrowRight, Search, MapPin, Clock, Star } from 'lucide-react';
+import { ArrowRight, Search, MapPin, Clock, Star, PlusCircle, LogIn, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
+import AuthModal from '@/components/AuthModal';
 
 export default function Home() {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   return (
-    <div className="flex-1 bg-[#fdfcf8] flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <div className="flex-1 bg-[#fdfcf8] flex flex-col items-center justify-center px-6 relative min-h-screen overflow-hidden">
+      {/* Navbar simulation */}
+      <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-20">
+        <div className="text-2xl font-black text-gray-900">
+          Versa<span className="text-emerald-600">Temple</span>
+        </div>
+        <div className="flex gap-4">
+          <button
+            onClick={() => setIsAuthModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-600 hover:text-emerald-600 transition-colors"
+          >
+            <LogIn size={18} /> Login
+          </button>
+          <button
+            onClick={() => setIsAuthModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-white text-emerald-600 rounded-xl shadow-sm border border-emerald-50 hover:bg-emerald-50 transition-colors"
+          >
+            <UserPlus size={18} /> Registrati
+          </button>
+        </div>
+      </div>
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+
       {/* Decorative background elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-emerald-100/50 rounded-full blur-3xl opacity-60" />
@@ -37,7 +64,13 @@ export default function Home() {
             href="/search"
             className="group relative inline-flex items-center gap-3 bg-emerald-600 text-white px-10 py-5 rounded-2xl text-xl font-bold hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-200 hover:scale-105 active:scale-95"
           >
-            Cerca casa <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+            <Search size={24} /> Cerca casa <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link
+            href="/post"
+            className="group relative inline-flex items-center gap-3 bg-white text-emerald-600 border-2 border-emerald-100 px-10 py-5 rounded-2xl text-xl font-bold hover:bg-emerald-50 transition-all shadow-lg hover:scale-105 active:scale-95"
+          >
+            <PlusCircle size={24} /> Posta annuncio
           </Link>
         </div>
 

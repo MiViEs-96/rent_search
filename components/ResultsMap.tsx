@@ -30,9 +30,21 @@ const WorkIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-function ChangeView({ center, zoom }: { center: [number, number], zoom: number }) {
+function ChangeView({ properties, workers }: { properties: ScoredProperty[], workers: any[] }) {
   const map = useMap();
-  map.setView(center, zoom);
+
+  useEffect(() => {
+    if (properties.length === 0 && workers.length === 0) return;
+
+    const bounds = L.latLngBounds([]);
+    properties.forEach(p => bounds.extend([p.lat, p.lon]));
+    workers.forEach(w => bounds.extend([w.lat, w.lon]));
+
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [properties, workers, map]);
+
   return null;
 }
 
@@ -51,11 +63,11 @@ export default function ResultsMap({ properties, workers, selectedProperty }: Ma
 
   if (!mounted) return <div className="h-full w-full bg-gray-100 animate-pulse rounded-3xl" />;
 
-  const center: [number, number] = [53.3498, -6.2603]; // Dublin center
+  const defaultCenter: [number, number] = [53.3498, -6.2603]; // Dublin center
 
   return (
     <MapContainer
-      center={center}
+      center={defaultCenter}
       zoom={12}
       className="h-full w-full rounded-3xl shadow-inner z-0"
     >
@@ -67,7 +79,7 @@ export default function ResultsMap({ properties, workers, selectedProperty }: Ma
       {properties.map((p) => (
         <Marker
           key={p.id}
-          position={[p.latitude, p.longitude]}
+          position={[p.lat, p.lon]}
           icon={HomeIcon}
           opacity={selectedProperty && selectedProperty !== p.id ? 0.5 : 1}
         >
@@ -76,14 +88,16 @@ export default function ResultsMap({ properties, workers, selectedProperty }: Ma
               <h3 className="font-bold text-sm">{p.title}</h3>
               <p className="text-emerald-600 font-semibold">€{p.price}/mo</p>
               <p className="text-xs text-gray-500">{p.bedrooms} Bed • {p.bathrooms} Bath</p>
-              <a
-                href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 block text-center bg-emerald-600 text-white text-xs py-1 rounded hover:bg-emerald-700 transition-colors"
-              >
-                View on Daft.ie
-              </a>
+              {p.url && p.url !== '#' && (
+                <a
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 block text-center bg-emerald-600 text-white text-xs py-1 rounded hover:bg-emerald-700 transition-colors"
+                >
+                  View on Daft.ie
+                </a>
+              )}
             </div>
           </Popup>
         </Marker>
@@ -91,11 +105,11 @@ export default function ResultsMap({ properties, workers, selectedProperty }: Ma
 
       {workers.map((w, i) => (
         <Marker key={`worker-${i}`} position={[w.lat, w.lon]} icon={WorkIcon}>
-          <Popup>Workplace {i + 1}</Popup>
+          <Popup>Lavoratore {i + 1}</Popup>
         </Marker>
       ))}
 
-      <ChangeView center={center} zoom={12} />
+      <ChangeView properties={properties} workers={workers} />
     </MapContainer>
   );
 }

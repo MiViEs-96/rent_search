@@ -86,6 +86,53 @@ export async function getCommuteTime(
   });
 }
 
+export async function getDistanceToNearest(
+  lat: number,
+  lon: number,
+  type: 'school' | 'hospital' | 'supermarket' | 'transport'
+): Promise<number> {
+  const roundedLat = Math.round(lat * 1000) / 1000;
+  const roundedLon = Math.round(lon * 1000) / 1000;
+  const cacheKey = `nearest_dist:${roundedLat},${roundedLon}:${type}`;
+
+  return withCache(cacheKey, async () => {
+    try {
+      const queries = {
+        school: `[out:json];node["amenity"="school"](around:5000,${lat},${lon});out body;`,
+        hospital: `[out:json];node["amenity"="hospital"](around:10000,${lat},${lon});out body;`,
+        supermarket: `[out:json];node["shop"="supermarket"](around:5000,${lat},${lon});out body;`,
+        transport: `[out:json];(node["highway"="bus_stop"](around:2000,${lat},${lon});node["railway"="station"](around:3000,${lat},${lon}));out body;`
+      };
+
+      const query = queries[type];
+      const response = await axios.get('https://overpass-api.de/api/interpreter', {
+        params: { data: query },
+        timeout: 10000
+      });
+
+      if (response.data && response.data.elements && response.data.elements.length > 0) {
+        let minDistance = Infinity;
+        for (const el of response.data.elements) {
+          // Haversine approx
+          const dLat = (el.lat - lat) * Math.PI / 180;
+          const dLon = (el.lon - lon) * Math.PI / 180;
+          const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat * Math.PI / 180) * Math.cos(el.lat * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const dist = 6371000 * c; // meters
+          if (dist < minDistance) minDistance = dist;
+        }
+        return Math.round(minDistance);
+      }
+      return 10000;
+    } catch (error) {
+      console.error('Overpass distance error:', error);
+      return 10000;
+    }
+  });
+}
+
 export async function getNearbyAmenities(
   lat: number,
   lon: number,
