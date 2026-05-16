@@ -1,6 +1,53 @@
-import { SearchCriteria, ScoredProperty } from './scoring-engine';
 import { PropertyRecord } from './db';
 import { getCommuteTime } from './geo-service';
+
+export interface SearchCriteria {
+  numPeople: number;
+  numWorkers: number;
+  budget: number;
+  rooms: number;
+  workers: Array<{
+    address: string;
+    lat: number;
+    lon: number;
+    transport: 'car' | 'public';
+  }>;
+  priorities: {
+    schools: number;
+    hospitals: number;
+    supermarkets: number;
+    transport: number;
+  };
+}
+
+export interface ScoredProperty {
+  id: string;
+  title: string;
+  address: string;
+  price: number;
+  image: string;
+  url: string;
+  bedrooms: number;
+  bathrooms: number;
+  score: number;
+  commuteTimes: number[];
+  amenitiesCount: {
+    schools: number;
+    hospitals: number;
+    supermarkets: number;
+    transport: number;
+  };
+  lat: number;
+  lon: number;
+  description?: string;
+  ber?: string;
+  availableFrom?: string;
+  features?: {
+    garden: boolean;
+    parking: boolean;
+    accessible: boolean;
+  }
+}
 
 export async function scoreProperty(p: PropertyRecord, criteria: SearchCriteria): Promise<ScoredProperty> {
   // 1. Calculate commutes

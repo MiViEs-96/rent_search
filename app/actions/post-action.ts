@@ -3,6 +3,8 @@
 import db from '@/lib/db';
 import { geocode, getDistanceToNearest } from '@/lib/geo-service';
 import { revalidatePath } from 'next/cache';
+import fs from 'fs';
+import path from 'path';
 
 export async function postPropertyAction(formData: FormData) {
   try {
@@ -19,7 +21,19 @@ export async function postPropertyAction(formData: FormData) {
     const availableFrom = availableFromDate || availableFromText || 'Non specificato';
     const description = formData.get('description') as string;
     const isAccessible = formData.get('isAccessible') === 'on' ? 1 : 0;
-    const imageUrl = formData.get('imageUrl') as string;
+    let imageUrl = formData.get('imageUrl') as string;
+    const imageFile = formData.get('imageFile') as File;
+
+    if (imageFile && imageFile.size > 0) {
+      const bytes = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const filename = `${Date.now()}-${imageFile.name}`;
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+      const filepath = path.join(uploadDir, filename);
+      fs.writeFileSync(filepath, buffer);
+      imageUrl = `/uploads/${filename}`;
+    }
 
     // Geocode
     const location = await geocode(eircode);

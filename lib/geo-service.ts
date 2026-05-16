@@ -22,23 +22,41 @@ export async function geocode(address: string): Promise<Location | null> {
   const cacheKey = `geocode:${address}`;
   return withCache(cacheKey, async () => {
     try {
-      const eircodeRegex = /^[A-Z][0-9][0-9W]\s?[0-9A-Z]{4}$/i;
-      let query = address;
-      if (!eircodeRegex.test(address) && !address.toLowerCase().includes('dublin')) {
-        query = address + ', Dublin, Ireland';
+      const eircodeRegex = /^([A-Z][0-9][0-9W])\s?([0-9A-Z]{4})$/i;
+      const match = address.trim().match(eircodeRegex);
+
+      let query = address.trim();
+      let fallbacks: string[] = [];
+
+      if (match) {
+        const routingKey = match[1].toUpperCase();
+        // Nominatim is bad with Eircodes, use Dublin district fallback if applicable
+        if (routingKey.startsWith('D')) {
+          const district = routingKey === 'D6W' ? '6W' : parseInt(routingKey.substring(1)).toString();
+          fallbacks.push(`Dublin ${district}, Ireland`);
+        }
+        // General fallback with Routing Key
+        fallbacks.push(`${routingKey}, Ireland`);
+      } else if (!query.toLowerCase().includes('ireland')) {
+        query = query + ', Ireland';
       }
 
-      const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
-        params: {
-          q: query,
-          format: 'json',
-          limit: 1,
-          countrycodes: 'ie'
-        },
-        headers: {
-          'User-Agent': 'VersaTemple-Housing-App-v2'
-        }
+      // Try primary query
+      let response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
+        params: { q: query, format: 'json', limit: 1, countrycodes: 'ie' },
+        headers: { 'User-Agent': 'VersaTemple-Housing-App-v2' }
       });
+
+      // Try fallbacks if primary fails
+      if ((!response.data || response.data.length === 0) && fallbacks.length > 0) {
+        for (const fb of fallbacks) {
+          response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
+            params: { q: fb, format: 'json', limit: 1, countrycodes: 'ie' },
+            headers: { 'User-Agent': 'VersaTemple-Housing-App-v2' }
+          });
+          if (response.data && response.data.length > 0) break;
+        }
+      }
 
       if (response.data && response.data.length > 0) {
         return {

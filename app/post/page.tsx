@@ -181,12 +181,25 @@ export default function PostPage() {
             </div>
 
             {/* Image */}
-            <div className="space-y-2">
+            <div className="space-y-4">
               <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                <ImageIcon size={16} /> URL Foto (o carica da PC)
+                <ImageIcon size={16} /> Foto della casa
               </label>
-              <input name="imageUrl" placeholder="Incolla l'URL dell'immagine" className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50/50 outline-none" />
-              <p className="text-[10px] text-gray-400">Nota: Al momento il caricamento diretto salva solo l'URL. Supporto per file binari in arrivo.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 mb-2 uppercase">URL Immagine</label>
+                  <input name="imageUrl" placeholder="Incolla l'URL dell'immagine" className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50/50 outline-none" />
+                </div>
+                <div className="relative">
+                  <label className="block text-xs font-bold text-gray-400 mb-2 uppercase">Oppure carica dal PC</label>
+                  <input
+                    name="imageFile"
+                    type="file"
+                    accept="image/*"
+                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                  />
+                </div>
+              </div>
             </div>
 
             <button
